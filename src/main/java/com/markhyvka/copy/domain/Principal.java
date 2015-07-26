@@ -1,4 +1,4 @@
-package com.markhyvka.domain;
+package com.markhyvka.copy.domain;
 
 import java.util.Calendar;
 

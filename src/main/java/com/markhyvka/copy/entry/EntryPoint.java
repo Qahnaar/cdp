@@ -1,12 +1,11 @@
-package com.markhyvka.entry;
+package com.markhyvka.copy.entry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import com.markhyvka.domain.Employee;
-
-import com.markhyvka.util.DeepCopyUtil;
+import com.markhyvka.copy.domain.Employee;
+import com.markhyvka.copy.util.DeepCopyUtil;
 
 public class EntryPoint {
 

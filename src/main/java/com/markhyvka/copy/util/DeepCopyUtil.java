@@ -1,6 +1,7 @@
-package com.markhyvka.util;
+package com.markhyvka.copy.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 public class DeepCopyUtil {
 
@@ -21,12 +22,14 @@ public class DeepCopyUtil {
 			throws InstantiationException, IllegalAccessException {
 
 		for (Field field : fields) {
-			accessibilityCheck(field);
-			Object fieldValue = field.get(source);
-			if (field.getType().isPrimitive()) {
-				field.set(target, fieldValue);
-			} else {
-				// field.set(target, deepCopy(fieldValue));
+			if (!isFiledStatic(field)) {
+				accessibilityCheck(field);
+				Object fieldValue = field.get(source);
+				if (field.getType().isPrimitive()) {
+					field.set(target, fieldValue);
+				} else {
+					field.set(target, deepCopy(fieldValue));
+				}
 			}
 		}
 	}
@@ -35,5 +38,9 @@ public class DeepCopyUtil {
 		if (!field.isAccessible()) {
 			field.setAccessible(Boolean.TRUE);
 		}
+	}
+
+	private boolean isFiledStatic(Field field) {
+		return Modifier.isStatic(field.getModifiers());
 	}
 }
