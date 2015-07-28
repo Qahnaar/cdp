@@ -1,4 +1,4 @@
-package com.markhyvla.proxy.domain;
+package com.markhyvka.proxy.domain;
 
 import java.util.List;
 
