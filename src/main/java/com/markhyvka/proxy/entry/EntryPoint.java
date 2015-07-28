@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.markhyvka.proxy.domain.CalcuationStrategy;
+import com.markhyvka.proxy.domain.Cart;
+import com.markhyvka.proxy.domain.DefaultCalculationStrategy;
+import com.markhyvka.proxy.domain.Product;
 import com.markhyvka.proxy.util.ProxyUtil;
-import com.markhyvla.proxy.domain.CalcuationStrategy;
-import com.markhyvla.proxy.domain.Cart;
-import com.markhyvla.proxy.domain.DefaultCalculationStrategy;
-import com.markhyvla.proxy.domain.Product;
 
 public class EntryPoint {
 	private static final String USERNAME = "username";
