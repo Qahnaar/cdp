@@ -4,7 +4,11 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.apache.log4j.Logger;
+
 public class ProxyUtil implements InvocationHandler {
+
+	final static Logger LOG = Logger.getLogger(ProxyUtil.class);
 
 	private static final String MONITORED_METHOD_NAME = "calculate";
 
@@ -22,7 +26,7 @@ public class ProxyUtil implements InvocationHandler {
 	public Object invoke(Object proxy, Method method, Object[] args)
 			throws Throwable {
 		if (method.getName().endsWith(MONITORED_METHOD_NAME)) {
-			System.out.println("Logged call to required method");
+			LOG.debug("Monitored method has been captured");
 		}
 		return method.invoke(object, args);
 	}

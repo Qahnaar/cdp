@@ -3,7 +3,11 @@ package com.markhyvka.copy.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.apache.log4j.Logger;
+
 public class DeepCopyUtil {
+
+	final static Logger LOG = Logger.getLogger(DeepCopyUtil.class);
 
 	public Object deepCopy(Object source) throws InstantiationException,
 			IllegalAccessException {
@@ -11,6 +15,7 @@ public class DeepCopyUtil {
 		Object target = sourceClass.newInstance();
 		do {
 			Field[] declaredFields = sourceClass.getDeclaredFields();
+			LOG.debug("Started copying of " + sourceClass.getCanonicalName());
 			deepCopyFields(source, target, declaredFields);
 			sourceClass = sourceClass.getSuperclass();
 		} while (sourceClass != Object.class);
@@ -22,13 +27,17 @@ public class DeepCopyUtil {
 			throws InstantiationException, IllegalAccessException {
 
 		for (Field field : fields) {
-			if (!isFiledStatic(field)) {
+			if (!isFieldStatic(field)) {
 				accessibilityCheck(field);
 				Object fieldValue = field.get(source);
+				LOG.debug("Copying field " + field.getName());
 				if (field.getType().isPrimitive()) {
 					field.set(target, fieldValue);
 				} else {
-					field.set(target, deepCopy(fieldValue));
+					// TODO: here should be the proper implementation of deep
+					// copy of the object for the testing purposes shallow copy
+					// is performed
+					field.set(target, fieldValue);
 				}
 			}
 		}
@@ -40,7 +49,7 @@ public class DeepCopyUtil {
 		}
 	}
 
-	private boolean isFiledStatic(Field field) {
+	private boolean isFieldStatic(Field field) {
 		return Modifier.isStatic(field.getModifiers());
 	}
 }

@@ -4,11 +4,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.markhyvka.copy.domain.Employee;
 import com.markhyvka.copy.util.DeepCopyUtil;
 
 public class EntryPoint {
 
+	final static Logger LOG = Logger.getLogger(EntryPoint.class);
+
+	private static final long FAVOURITE_USER_16 = 16L;
+	private static final long FAVOURITE_USER_14 = 14L;
+	private static final String ALCOHOL_DEPARTMENT = "ALCOHOL";
+	private static final String BEVERAGES_DEPARTMENT = "BEVERAGES";
 	private static final int WORKED_HOURS = 1000;
 	private static final String EMPLOYEE_CARD_NUM = "100001";
 	private static final byte[] ICON = { 3, 5 };
@@ -19,11 +27,11 @@ public class EntryPoint {
 	private static final List<String> DEPARTMENTS = new ArrayList<String>();
 
 	static {
-		FAVOURITE_USERS.add(14L);
-		FAVOURITE_USERS.add(16L);
+		FAVOURITE_USERS.add(FAVOURITE_USER_14);
+		FAVOURITE_USERS.add(FAVOURITE_USER_16);
 
-		DEPARTMENTS.add("BEVERAGES");
-		DEPARTMENTS.add("ALCOHOL");
+		DEPARTMENTS.add(BEVERAGES_DEPARTMENT);
+		DEPARTMENTS.add(ALCOHOL_DEPARTMENT);
 	}
 
 	public static void main(String[] args) throws InstantiationException,
@@ -31,25 +39,25 @@ public class EntryPoint {
 		Employee source = new EntryPoint().populateEmployee();
 		Employee target = (Employee) new DeepCopyUtil().deepCopy(source);
 
-		System.out.println(target);
+		LOG.debug("Source " + source + " has been copied to " + target);
 	}
 
 	private Employee populateEmployee() {
-		Employee emp = new Employee();
+		Employee employee = new Employee();
 
-		emp.setUsername(USERNAME);
-		emp.setPassword(PASSWORD);
-		emp.isActive = Boolean.TRUE;
-		emp.setLastUsed(Calendar.getInstance());
+		employee.setUsername(USERNAME);
+		employee.setPassword(PASSWORD);
+		employee.isActive = Boolean.TRUE;
+		employee.setLastUsed(Calendar.getInstance());
 
-		emp.setUserId(USER_ID);
-		emp.setFavouriteUsers(FAVOURITE_USERS);
-		emp.icon = ICON;
+		employee.setUserId(USER_ID);
+		employee.setFavouriteUsers(FAVOURITE_USERS);
+		employee.icon = ICON;
 
-		emp.setEmployeeCardNum(EMPLOYEE_CARD_NUM);
-		emp.setDepartments(DEPARTMENTS);
-		emp.workedHours = WORKED_HOURS;
+		employee.setEmployeeCardNum(EMPLOYEE_CARD_NUM);
+		employee.setDepartments(DEPARTMENTS);
+		employee.workedHours = WORKED_HOURS;
 
-		return emp;
+		return employee;
 	}
 }

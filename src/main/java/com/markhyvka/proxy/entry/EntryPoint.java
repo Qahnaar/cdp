@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.markhyvka.proxy.domain.CalcuationStrategy;
 import com.markhyvka.proxy.domain.Cart;
 import com.markhyvka.proxy.domain.DefaultCalculationStrategy;
@@ -11,6 +13,9 @@ import com.markhyvka.proxy.domain.Product;
 import com.markhyvka.proxy.util.ProxyUtil;
 
 public class EntryPoint {
+
+	final static Logger LOG = Logger.getLogger(EntryPoint.class);
+
 	private static final String USERNAME = "username";
 	private static final String SPRITE = "sprite";
 	private static final String BREAD = "bread";
@@ -23,7 +28,8 @@ public class EntryPoint {
 						new Class[] { CalcuationStrategy.class });
 
 		Cart cart = populateCart();
-		System.out.println(calcStrategyProxy.calculate(cart).toPlainString());
+		LOG.debug("Cart has been calculated to be "
+				+ calcStrategyProxy.calculate(cart));
 	}
 
 	private static Cart populateCart() {
