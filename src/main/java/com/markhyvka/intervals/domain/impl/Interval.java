@@ -34,6 +34,28 @@ public class Interval<T extends Number> implements DoubleBounded<Bound<T>>,
 	}
 
 	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+		if (BoundType.INCLUSIVE.equals(lowerBound.getBoundType())) {
+			builder.append("[");
+		} else {
+			builder.append("(");
+		}
+
+		builder.append(lowerBound.getBoundValue().doubleValue()).append(";")
+				.append(upperBound.getBoundValue().doubleValue());
+
+		if (BoundType.INCLUSIVE.equals(upperBound.getBoundType())) {
+			builder.append("]");
+		} else {
+			builder.append(")");
+		}
+
+		return builder.toString();
+	}
+
+	@Override
 	public boolean isLowerBoundApplicable(Bound<T> other) {
 		if (BoundType.EXCLUSIVE.equals(other.getBoundType())
 				&& BoundType.EXCLUSIVE.equals(upperBound.getBoundType())) {

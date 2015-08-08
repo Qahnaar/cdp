@@ -30,26 +30,22 @@ public class IntegerIntervalHelper implements IntervalHelper<Integer> {
 
 	@Override
 	public void populateCollection(Collection<Interval<Integer>> collection) {
-		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(0),
-				BoundType.INCLUSIVE, Integer.valueOf(2)));
-		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(2),
-				BoundType.INCLUSIVE, Integer.valueOf(7)));
-		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(7),
-				BoundType.INCLUSIVE, Integer.valueOf(10)));
-		// collection.add(createInterval(BoundType.INCLUSIVE,
+		// collection.add(createInterval(BoundType.EXCLUSIVE,
 		// Integer.valueOf(0),
-		// BoundType.EXCLUSIVE, Integer.valueOf(2)));
-		// collection.add(createInterval(BoundType.INCLUSIVE,
-		// Integer.valueOf(3),
-		// BoundType.INCLUSIVE, Integer.valueOf(4)));
+		// BoundType.INCLUSIVE, Integer.valueOf(2)));
 		// collection.add(createInterval(BoundType.EXCLUSIVE,
-		// Integer.valueOf(5),
-		// BoundType.EXCLUSIVE, Integer.valueOf(6)));
-		// collection.add(createInterval(BoundType.INCLUSIVE,
-		// Integer.valueOf(6),
-		// BoundType.EXCLUSIVE, Integer.valueOf(8)));
+		// Integer.valueOf(2),
+		// BoundType.EXCLUSIVE, Integer.valueOf(7)));
 		// collection.add(createInterval(BoundType.EXCLUSIVE,
-		// Integer.valueOf(9),
+		// Integer.valueOf(7),
 		// BoundType.INCLUSIVE, Integer.valueOf(10)));
+		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(1),
+				BoundType.EXCLUSIVE, Integer.valueOf(3)));
+		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(4),
+				BoundType.EXCLUSIVE, Integer.valueOf(5)));
+		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(6),
+				BoundType.EXCLUSIVE, Integer.valueOf(10)));
+		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(15),
+				BoundType.INCLUSIVE, Integer.valueOf(20)));
 	}
 }

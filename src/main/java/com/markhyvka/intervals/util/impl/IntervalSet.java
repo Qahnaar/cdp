@@ -9,6 +9,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.markhyvka.intervals.domain.MergableCollection;
+import com.markhyvka.intervals.domain.impl.Bound;
 import com.markhyvka.intervals.domain.impl.Interval;
 
 public class IntervalSet<D extends Number, T extends Interval<D>> extends
@@ -69,6 +70,11 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 		return finishMerging(subsetForReplacement, interval);
 	}
 
+	@Override
+	public String toString() {
+		return "IntervalSet contains " + set;
+	}
+
 	private Set<T> retrieveSubsetForReplacement(T lowerBound, T upperBound) {
 		Set<T> subset = Collections.emptySet();
 
@@ -83,7 +89,12 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 				subset = set.tailSet(lowerBound);
 			} else {
 				if (!lowerBound.equals(upperBound)) {
-					subset = set.subSet(lowerBound, upperBound);
+					T next = getNextElement(upperBound);
+					if (next.equals(upperBound)) {
+						subset = set.tailSet(lowerBound);
+					} else {
+						subset = set.subSet(lowerBound, next);
+					}
 				} else {
 					subset = Collections.emptySet();
 				}
@@ -91,6 +102,21 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 		}
 
 		return subset;
+	}
+
+	private T getNextElement(T upperBound) {
+		T element = upperBound;
+		Iterator<T> iterator = iterator();
+		while (iterator.hasNext()) {
+			T next = iterator.next();
+			if (next.equals(upperBound)) {
+				if (iterator.hasNext()) {
+					element = iterator.next();
+					break;
+				}
+			}
+		}
+		return element;
 	}
 
 	private boolean finishMerging(Set<T> subset, T interval) {
@@ -103,11 +129,23 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 			return Boolean.TRUE;
 		}
 
-		interval.setLowerBound(subset.iterator().next().getLowerBound());
-		interval.setUpperBound(getLastElement(subset).getUpperBound());
+		interval.setLowerBound(getLowestValue(subset.iterator().next()
+				.getLowerBound(), interval.getLowerBound()));
+		interval.setUpperBound(getBiggestValue(getLastElement(subset)
+				.getUpperBound(), interval.getUpperBound()));
 		subset.clear();
 		set.add(interval);
 		return Boolean.TRUE;
+	}
+
+	private Bound<D> getLowestValue(Bound<D> first, Bound<D> second) {
+		return (first.getBoundValue().doubleValue() < second.getBoundValue()
+				.doubleValue()) ? first : second;
+	}
+
+	private Bound<D> getBiggestValue(Bound<D> first, Bound<D> second) {
+		return (first.getBoundValue().doubleValue() > second.getBoundValue()
+				.doubleValue()) ? first : second;
 	}
 
 	private T getLastElement(final Collection<T> c) {
