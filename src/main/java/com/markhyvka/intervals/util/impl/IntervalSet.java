@@ -3,6 +3,7 @@ package com.markhyvka.intervals.util.impl;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
@@ -13,10 +14,11 @@ import com.markhyvka.intervals.domain.impl.Bound;
 import com.markhyvka.intervals.domain.impl.Interval;
 
 public class IntervalSet<D extends Number, T extends Interval<D>> extends
-		AbstractSet<T> implements MergableCollection<T> {
+		AbstractSet<T> implements SortedSet<T>, MergableCollection<T> {
 
 	private SortedSet<T> set;
 
+	// Few constructors
 	public IntervalSet() {
 		set = new TreeSet<T>();
 	}
@@ -25,6 +27,7 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 		set = new TreeSet<T>(collection);
 	}
 
+	// Methods overridden from AbstractSet
 	@Override
 	public boolean add(T e) {
 		return set.add(e);
@@ -35,6 +38,7 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 		return set.addAll(c);
 	}
 
+	// Methods overridden from SortedSet
 	@Override
 	public Iterator<T> iterator() {
 		return set.iterator();
@@ -45,6 +49,43 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 		return set.size();
 	}
 
+	@Override
+	public Comparator<? super T> comparator() {
+		return set.comparator();
+	}
+
+	@Override
+	public SortedSet<T> subSet(T fromElement, T toElement) {
+		return set.subSet(fromElement, toElement);
+	}
+
+	@Override
+	public SortedSet<T> headSet(T toElement) {
+		return set.headSet(toElement);
+	}
+
+	@Override
+	public SortedSet<T> tailSet(T fromElement) {
+		return set.tailSet(fromElement);
+	}
+
+	@Override
+	public T first() {
+		return set.first();
+	}
+
+	@Override
+	public T last() {
+		return set.last();
+	}
+
+	// Methods overridden from Object
+	@Override
+	public String toString() {
+		return "IntervalSet contains " + set;
+	}
+
+	// Methods overridden from MergableCollection
 	@Override
 	public boolean merge(T interval) {
 		T lowerBound = null, upperBound = null;
@@ -70,11 +111,6 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 		return finishMerging(subsetForReplacement, interval);
 	}
 
-	@Override
-	public String toString() {
-		return "IntervalSet contains " + set;
-	}
-
 	private Set<T> retrieveSubsetForReplacement(T lowerBound, T upperBound) {
 		Set<T> subset = Collections.emptySet();
 
@@ -88,15 +124,11 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 			if (upperBound == null) {
 				subset = set.tailSet(lowerBound);
 			} else {
-				if (!lowerBound.equals(upperBound)) {
-					T next = getNextElement(upperBound);
-					if (next.equals(upperBound)) {
-						subset = set.tailSet(lowerBound);
-					} else {
-						subset = set.subSet(lowerBound, next);
-					}
+				T next = getNextElement(upperBound);
+				if (next.equals(upperBound)) {
+					subset = set.tailSet(lowerBound);
 				} else {
-					subset = Collections.emptySet();
+					subset = set.subSet(lowerBound, next);
 				}
 			}
 		}
@@ -123,16 +155,11 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 		if (subset.size() == 0)
 			return Boolean.FALSE;
 
-		if (subset.size() == set.size()) {
-			subset.clear();
-			set.add(interval);
-			return Boolean.TRUE;
-		}
-
 		interval.setLowerBound(getLowestValue(subset.iterator().next()
 				.getLowerBound(), interval.getLowerBound()));
 		interval.setUpperBound(getBiggestValue(getLastElement(subset)
 				.getUpperBound(), interval.getUpperBound()));
+
 		subset.clear();
 		set.add(interval);
 		return Boolean.TRUE;

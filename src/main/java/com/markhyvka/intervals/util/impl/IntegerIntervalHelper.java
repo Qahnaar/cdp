@@ -30,15 +30,6 @@ public class IntegerIntervalHelper implements IntervalHelper<Integer> {
 
 	@Override
 	public void populateCollection(Collection<Interval<Integer>> collection) {
-		// collection.add(createInterval(BoundType.EXCLUSIVE,
-		// Integer.valueOf(0),
-		// BoundType.INCLUSIVE, Integer.valueOf(2)));
-		// collection.add(createInterval(BoundType.EXCLUSIVE,
-		// Integer.valueOf(2),
-		// BoundType.EXCLUSIVE, Integer.valueOf(7)));
-		// collection.add(createInterval(BoundType.EXCLUSIVE,
-		// Integer.valueOf(7),
-		// BoundType.INCLUSIVE, Integer.valueOf(10)));
 		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(1),
 				BoundType.EXCLUSIVE, Integer.valueOf(3)));
 		collection.add(createInterval(BoundType.EXCLUSIVE, Integer.valueOf(4),
