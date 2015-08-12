@@ -11,6 +11,7 @@ import java.util.TreeSet;
 
 import com.markhyvka.intervals.domain.MergableCollection;
 import com.markhyvka.intervals.domain.impl.Bound;
+import com.markhyvka.intervals.domain.impl.Bound.BoundType;
 import com.markhyvka.intervals.domain.impl.Interval;
 
 public class IntervalSet<D extends Number, T extends Interval<D>> extends
@@ -30,12 +31,17 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 	// Methods overridden from AbstractSet
 	@Override
 	public boolean add(T e) {
-		return set.add(e);
+		return merge(e);
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends T> c) {
-		return set.addAll(c);
+		for (T interval : c) {
+			if (!merge(interval)) {
+				break;
+			}
+		}
+		return Boolean.TRUE;
 	}
 
 	// Methods overridden from SortedSet
@@ -97,6 +103,12 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 			}
 		}
 
+		if (lowerBound == null) {
+			if (checkUppestElement(set.last(), interval)) {
+				lowerBound = set.last();
+			}
+		}
+
 		Set<T> reverseOrderedSet = new TreeSet<T>(Collections.reverseOrder());
 		reverseOrderedSet.addAll(set);
 		for (T entry : reverseOrderedSet) {
@@ -106,31 +118,55 @@ public class IntervalSet<D extends Number, T extends Interval<D>> extends
 			}
 		}
 
+		if (upperBound == null) {
+			if (checkLowestElement(set.first(), interval)) {
+				upperBound = set.first();
+			}
+		}
+
 		Set<T> subsetForReplacement = retrieveSubsetForReplacement(lowerBound,
 				upperBound);
 		return finishMerging(subsetForReplacement, interval);
 	}
 
+	private boolean checkLowestElement(T lowestInterval, T interval) {
+		if (BoundType.EXCLUSIVE.equals(lowestInterval.getLowerBound()
+				.getBoundType())
+				&& BoundType.EXCLUSIVE.equals(interval.getUpperBound()
+						.getBoundType())) {
+			return interval.getUpperBound().getBoundValue().doubleValue() > lowestInterval
+					.getLowerBound().getBoundValue().doubleValue();
+		}
+
+		return interval.getUpperBound().getBoundValue().doubleValue() >= lowestInterval
+				.getLowerBound().getBoundValue().doubleValue();
+	}
+
+	private boolean checkUppestElement(T uppestInterval, T interval) {
+		if (BoundType.EXCLUSIVE.equals(uppestInterval.getUpperBound()
+				.getBoundType())
+				&& BoundType.EXCLUSIVE.equals(interval.getLowerBound()
+						.getBoundType())) {
+			return interval.getLowerBound().getBoundValue().doubleValue() < uppestInterval
+					.getUpperBound().getBoundValue().doubleValue();
+		}
+
+		return interval.getLowerBound().getBoundValue().doubleValue() <= uppestInterval
+				.getUpperBound().getBoundValue().doubleValue();
+	}
+
 	private Set<T> retrieveSubsetForReplacement(T lowerBound, T upperBound) {
 		Set<T> subset = Collections.emptySet();
 
-		if (lowerBound == null) {
-			if (upperBound == null) {
-				subset = set;
-			} else {
-				subset = set.headSet(upperBound);
-			}
+		if (lowerBound == null || upperBound == null) {
+			return Collections.emptySet();
+		}
+
+		T next = getNextElement(upperBound);
+		if (next.equals(upperBound)) {
+			subset = set.tailSet(lowerBound);
 		} else {
-			if (upperBound == null) {
-				subset = set.tailSet(lowerBound);
-			} else {
-				T next = getNextElement(upperBound);
-				if (next.equals(upperBound)) {
-					subset = set.tailSet(lowerBound);
-				} else {
-					subset = set.subSet(lowerBound, next);
-				}
-			}
+			subset = set.subSet(lowerBound, next);
 		}
 
 		return subset;
