@@ -12,15 +12,15 @@ import com.markhyvka.producerconsumer.domain.ProducerConsumerContext;
 import com.markhyvka.producerconsumer.domain.impl.ProducerConsumerState;
 import com.markhyvka.producerconsumer.util.WorkUnit;
 
-public class LineReaderUnit implements WorkUnit<String> {
+public class LineProducerUnit implements WorkUnit<String> {
 
-	private final static Logger LOG = Logger.getLogger(LineReaderUnit.class);
+	private final static Logger LOG = Logger.getLogger(LineProducerUnit.class);
 
 	private static final int DEFAULT_SIZE = 10;
 
 	private ProducerConsumerContext<String> context;
 
-	public LineReaderUnit(ProducerConsumerContext<String> context) {
+	public LineProducerUnit(ProducerConsumerContext<String> context) {
 		this.context = context;
 	}
 
@@ -34,7 +34,8 @@ public class LineReaderUnit implements WorkUnit<String> {
 
 	private void produce() {
 		DataSource<String> dataSource = new RowModelCachingDataSource<>();
-		Collection<String> collection = new CustomizedLazyCollection<>(DEFAULT_SIZE, dataSource);
+		Collection<String> collection = new CustomizedLazyCollection<>(
+				DEFAULT_SIZE, dataSource);
 		Iterator<String> iterator = collection.iterator();
 
 		while (iterator.hasNext()) {
@@ -43,8 +44,9 @@ public class LineReaderUnit implements WorkUnit<String> {
 				LOG.debug("Line Reader: another entry found (" + obj + ").");
 				context.getProducerProcessorQueue().put(obj);
 				LOG.debug("Line Reader: another entry inserted (" + obj + ").");
+				context.getProducerAccumulator().incrementAndGet();
 			} catch (InterruptedException e) {
-				LOG.debug("Line Reader: interrupted while putting another entry into queue. Ending work...");
+				LOG.debug("Line Reader: interrupted while putting another entry into queue. Ending work.");
 				context.setProducerState(ProducerConsumerState.IDLE);
 			}
 		}

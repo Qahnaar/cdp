@@ -78,6 +78,6 @@ public class RowModelCachingDataSource<T> implements DataSource<T> {
 	@SuppressWarnings("unchecked")
 	private void loadData() throws IOException, URISyntaxException {
 		loadedLines = (List<T>) Files.readAllLines(Paths.get(this.getClass()
-				.getResource("/lazyData.txt").toURI()));
+				.getResource("/testData.txt").toURI()));
 	}
 }

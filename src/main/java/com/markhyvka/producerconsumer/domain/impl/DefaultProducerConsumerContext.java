@@ -2,20 +2,28 @@ package com.markhyvka.producerconsumer.domain.impl;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.markhyvka.producerconsumer.domain.ProducerConsumerContext;
 
-public class DefaultProducerConsumerContext<T> implements ProducerConsumerContext<T> {
+public class DefaultProducerConsumerContext<T> implements
+		ProducerConsumerContext<T> {
 
 	private BlockingQueue<T> producerProcessorQueue;
 
 	private BlockingQueue<T> processorPersisterQueue;
 
-	private ProducerConsumerState producerState;
+	private volatile ProducerConsumerState producerState;
 
-	private ProducerConsumerState processorState;
+	private volatile ProducerConsumerState processorState;
 
-	private ProducerConsumerState persisterState;
+	private volatile ProducerConsumerState persisterState;
+
+	private AtomicInteger producerAccumulator;
+
+	private AtomicInteger processorAccumulator;
+
+	private AtomicInteger persisterAccumulator;
 
 	public DefaultProducerConsumerContext(int capacity) {
 		this.producerProcessorQueue = new LinkedBlockingQueue<>(capacity);
@@ -23,6 +31,9 @@ public class DefaultProducerConsumerContext<T> implements ProducerConsumerContex
 		producerState = ProducerConsumerState.IDLE;
 		processorState = ProducerConsumerState.IDLE;
 		persisterState = ProducerConsumerState.IDLE;
+		producerAccumulator = new AtomicInteger();
+		processorAccumulator = new AtomicInteger();
+		persisterAccumulator = new AtomicInteger();
 	}
 
 	@Override
@@ -32,7 +43,9 @@ public class DefaultProducerConsumerContext<T> implements ProducerConsumerContex
 
 	@Override
 	public void setProducerProcessorQueue(BlockingQueue<T> queue) {
-		this.producerProcessorQueue = queue;
+		synchronized (this.producerProcessorQueue) {
+			this.producerProcessorQueue = queue;
+		}
 	}
 
 	@Override
@@ -42,36 +55,85 @@ public class DefaultProducerConsumerContext<T> implements ProducerConsumerContex
 
 	@Override
 	public void setProcessorPersisterQueue(BlockingQueue<T> queue) {
-		this.processorPersisterQueue = queue;
+		synchronized (this.processorPersisterQueue) {
+			this.processorPersisterQueue = queue;
+		}
 	}
 
 	@Override
 	public ProducerConsumerState getProducerState() {
-		return producerState;
+		synchronized (this.producerState) {
+			return producerState;
+		}
 	}
 
 	@Override
 	public void setProducerState(ProducerConsumerState state) {
-		this.producerState = state;
+		synchronized (this.producerState) {
+			this.producerState = state;
+		}
 	}
 
 	@Override
 	public ProducerConsumerState getProcessorState() {
-		return processorState;
+		synchronized (this.processorState) {
+			return processorState;
+		}
 	}
 
 	@Override
 	public void setProcessorState(ProducerConsumerState state) {
-		this.processorState = state;
+		synchronized (this.processorState) {
+			this.processorState = state;
+		}
 	}
 
 	@Override
 	public ProducerConsumerState getPersisterState() {
-		return persisterState;
+		synchronized (this.persisterState) {
+			return persisterState;
+		}
 	}
 
 	@Override
 	public void setPersisterState(ProducerConsumerState state) {
-		this.persisterState = state;
+		synchronized (this.persisterState) {
+			this.persisterState = state;
+		}
+	}
+
+	@Override
+	public AtomicInteger getProducerAccumulator() {
+		return producerAccumulator;
+	}
+
+	@Override
+	public AtomicInteger getProcessorAccumulator() {
+		return processorAccumulator;
+	}
+
+	@Override
+	public AtomicInteger getPersisterAccumulator() {
+		return persisterAccumulator;
+	}
+
+	@Override
+	public boolean hasProducerEnded() {
+		return ProducerConsumerState.DONE.equals(getProducerState());
+	}
+
+	@Override
+	public boolean hasProcessorEnded() {
+		return ProducerConsumerState.DONE.equals(getProcessorState());
+	}
+
+	@Override
+	public boolean hasPersisterEnded() {
+		return ProducerConsumerState.DONE.equals(getPersisterState());
+	}
+
+	@Override
+	public boolean hasWorkEnded() {
+		return hasProducerEnded() && hasProcessorEnded() && hasPersisterEnded();
 	}
 }

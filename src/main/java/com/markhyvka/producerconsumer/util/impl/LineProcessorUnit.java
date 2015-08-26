@@ -29,13 +29,10 @@ public class LineProcessorUnit implements WorkUnit<String> {
 			LOG.debug("Line Processor: another entry processed (" + obj + " -> " + processedObj + ").");
 			produce(processedObj);
 			LOG.debug("Line Processor: another entry inserted (" + processedObj + ").");
+			context.getProcessorAccumulator().incrementAndGet();
 		}
 		LOG.debug("Line Processor: ended data processing.");
 		context.setProcessorState(ProducerConsumerState.DONE);
-	}
-
-	private boolean hasProducerEnded() {
-		return ProducerConsumerState.DONE.equals(context.getProducerState());
 	}
 
 	private boolean isProducerProcessorQueueEmpty() {
@@ -43,7 +40,7 @@ public class LineProcessorUnit implements WorkUnit<String> {
 	}
 
 	private boolean hasProducerConsumerEnded() {
-		return hasProducerEnded() && isProducerProcessorQueueEmpty();
+		return context.hasProducerEnded() && isProducerProcessorQueueEmpty();
 	}
 
 	private String consume() {
@@ -51,7 +48,7 @@ public class LineProcessorUnit implements WorkUnit<String> {
 		try {
 			obj = context.getProducerProcessorQueue().take();
 		} catch (InterruptedException e) {
-			LOG.debug("Line Processor: interrupted while retrieving another entry from queue. Ending work...");
+			LOG.debug("Line Processor: interrupted while retrieving another entry from queue. Ending work.");
 			context.setProcessorState(ProducerConsumerState.IDLE);
 		}
 		return obj;
@@ -65,7 +62,7 @@ public class LineProcessorUnit implements WorkUnit<String> {
 		try {
 			context.getProcessorPersisterQueue().put(obj);
 		} catch (InterruptedException e) {
-			LOG.debug("Line Processor: interrupted while putting another entry into queue. Ending work...");
+			LOG.debug("Line Processor: interrupted while putting another entry into queue. Ending work.");
 			context.setProcessorState(ProducerConsumerState.IDLE);
 		}
 	}
