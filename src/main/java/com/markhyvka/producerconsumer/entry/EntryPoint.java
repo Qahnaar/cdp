@@ -2,7 +2,7 @@ package com.markhyvka.producerconsumer.entry;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
@@ -20,20 +20,24 @@ public class EntryPoint {
 
 	private static final int DEFAULT_SIZE = 10;
 
-	public static void main(String[] args) throws FileNotFoundException,
-			UnsupportedEncodingException {
-		ProducerConsumerContext<String> context = new DefaultProducerConsumerContext<>(
-				DEFAULT_SIZE);
+	public static void main(String[] args)
+			throws FileNotFoundException, UnsupportedEncodingException, InterruptedException {
+		ProducerConsumerContext<String> context = new DefaultProducerConsumerContext<>(DEFAULT_SIZE);
 		Thread progressDaemon = new Thread(new ProgressDaemon(context));
 		progressDaemon.setDaemon(Boolean.TRUE);
 		progressDaemon.start();
 		LOG.debug("Producer - Processor - Persister started.");
-		Executor readerExecutor = Executors.newSingleThreadExecutor();
+		ExecutorService readerExecutor = Executors.newSingleThreadExecutor();
 		readerExecutor.execute(new LineProducerUnit(context));
-		Executor processorExecutor = Executors.newFixedThreadPool(DEFAULT_SIZE);
+		ExecutorService processorExecutor = Executors.newFixedThreadPool(DEFAULT_SIZE);
 		processorExecutor.execute(new LineProcessorUnit(context));
-		Executor persisterExecutor = Executors.newSingleThreadExecutor();
+		ExecutorService persisterExecutor = Executors.newSingleThreadExecutor();
 		persisterExecutor.execute(new LinePersisterUnit(context));
+		while (!context.hasWorkEnded()) {
+		}
+		readerExecutor.shutdownNow();
+		processorExecutor.shutdownNow();
+		persisterExecutor.shutdownNow();
 		LOG.debug("Producer - Processor - Persister ended.");
 	}
 }
