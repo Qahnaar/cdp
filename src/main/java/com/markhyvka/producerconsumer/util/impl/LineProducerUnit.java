@@ -3,7 +3,8 @@ package com.markhyvka.producerconsumer.util.impl;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.markhyvka.lazy.util.DataSource;
 import com.markhyvka.lazy.util.impl.CustomizedLazyCollection;
@@ -14,7 +15,7 @@ import com.markhyvka.producerconsumer.util.WorkUnit;
 
 public class LineProducerUnit implements WorkUnit<String> {
 
-	private final static Logger LOG = Logger.getLogger(LineProducerUnit.class);
+	private final static Logger LOG = LoggerFactory.getLogger(LineProducerUnit.class);
 
 	private static final int DEFAULT_SIZE = 10;
 
@@ -42,9 +43,8 @@ public class LineProducerUnit implements WorkUnit<String> {
 			try {
 				String obj = iterator.next();
 				LOG.debug("Line Reader: another entry found (" + obj + ").");
-				context.getProducerProcessorQueue().put(obj);
+				context.addProducerProcessorWorkUnit(obj);
 				LOG.debug("Line Reader: another entry inserted (" + obj + ").");
-				context.getProducerAccumulator().incrementAndGet();
 			} catch (InterruptedException e) {
 				LOG.debug("Line Reader: interrupted while putting another entry into queue. Ending work.");
 				context.setProducerState(ProducerConsumerState.IDLE);

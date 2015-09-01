@@ -5,7 +5,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.markhyvka.producerconsumer.domain.ProducerConsumerContext;
 import com.markhyvka.producerconsumer.domain.impl.DefaultProducerConsumerContext;
@@ -16,7 +17,7 @@ import com.markhyvka.producerconsumer.util.impl.ProgressDaemon;
 
 public class EntryPoint {
 
-	private final static Logger LOG = Logger.getLogger(LinePersisterUnit.class);
+	private final static Logger LOG = LoggerFactory.getLogger(LinePersisterUnit.class);
 
 	private static final int DEFAULT_SIZE = 10;
 
@@ -33,8 +34,7 @@ public class EntryPoint {
 		processorExecutor.execute(new LineProcessorUnit(context));
 		ExecutorService persisterExecutor = Executors.newSingleThreadExecutor();
 		persisterExecutor.execute(new LinePersisterUnit(context));
-		while (!context.hasWorkEnded()) {
-		}
+		context.waitForWorkEnd();
 		readerExecutor.shutdownNow();
 		processorExecutor.shutdownNow();
 		persisterExecutor.shutdownNow();

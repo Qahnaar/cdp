@@ -3,7 +3,10 @@ package com.markhyvka.lazy.entry;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.markhyvka.lazy.util.DataSource;
 import com.markhyvka.lazy.util.impl.CustomizedLazyCollection;
@@ -11,7 +14,7 @@ import com.markhyvka.lazy.util.impl.RowModelCachingDataSource;
 
 public class EntryPoint {
 	private static final int CAPACITY = 10;
-	final static Logger LOG = Logger.getLogger(EntryPoint.class);
+	private final static Logger LOG = LoggerFactory.getLogger(EntryPoint.class);
 
 	public static void main(String[] args) {
 		DataSource<String> dataSource = new RowModelCachingDataSource<>();

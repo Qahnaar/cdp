@@ -4,11 +4,12 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProxyUtil implements InvocationHandler {
 
-	final static Logger LOG = Logger.getLogger(ProxyUtil.class);
+	private final static Logger LOG = LoggerFactory.getLogger(ProxyUtil.class);
 
 	private static final String MONITORED_METHOD_NAME = "calculate";
 

@@ -1,19 +1,18 @@
 package com.markhyvka.producerconsumer.domain;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.markhyvka.producerconsumer.domain.impl.ProducerConsumerState;
 
 public interface ProducerConsumerContext<T> {
 
-	BlockingQueue<T> getProducerProcessorQueue();
+	T retrieveProducerProcessorWorkUnit() throws InterruptedException;
 
-	void setProducerProcessorQueue(BlockingQueue<T> queue);
+	void addProducerProcessorWorkUnit(T workUnit) throws InterruptedException;
 
-	BlockingQueue<T> getProcessorPersisterQueue();
+	T retrieveProcessorPersisterWorkUnit() throws InterruptedException;
 
-	void setProcessorPersisterQueue(BlockingQueue<T> queue);
+	void addProcessorPersisterWorkUnit(T workUnit) throws InterruptedException;
+
+	void registerPersisterWorkUnit();
 
 	ProducerConsumerState getProducerState();
 
@@ -27,12 +26,6 @@ public interface ProducerConsumerContext<T> {
 
 	void setPersisterState(ProducerConsumerState state);
 
-	AtomicInteger getProducerAccumulator();
-
-	AtomicInteger getProcessorAccumulator();
-
-	AtomicInteger getPersisterAccumulator();
-
 	boolean hasProducerEnded();
 
 	boolean hasProcessorEnded();
@@ -40,4 +33,20 @@ public interface ProducerConsumerContext<T> {
 	boolean hasPersisterEnded();
 
 	boolean hasWorkEnded();
+
+	boolean isProcessorPersisterQueueEmpty();
+
+	boolean hasProducerConsumerEnded();
+
+	boolean isProducerProcessorQueueEmpty();
+
+	int getProducedLineCounter();
+
+	int getProcessedLineCounter();
+
+	int getPersisterLineCounter();
+
+	void waitForWorkEnd() throws InterruptedException;
+
+	void notifyOfWorkEnd() throws InterruptedException;
 }

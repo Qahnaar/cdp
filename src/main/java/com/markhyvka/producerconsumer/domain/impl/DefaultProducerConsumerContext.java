@@ -1,8 +1,13 @@
 package com.markhyvka.producerconsumer.domain.impl;
 
+import java.math.BigDecimal;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.markhyvka.producerconsumer.domain.ProducerConsumerContext;
 
@@ -25,6 +30,14 @@ public class DefaultProducerConsumerContext<T> implements
 
 	private AtomicInteger persisterAccumulator;
 
+	private ReadWriteLock producerStateLock;
+
+	private ReadWriteLock processorStateLock;
+
+	private ReadWriteLock persisterStateLock;
+
+	private Lock workEndMonitor;
+
 	public DefaultProducerConsumerContext(int capacity) {
 		this.producerProcessorQueue = new LinkedBlockingQueue<>(capacity);
 		this.processorPersisterQueue = new LinkedBlockingQueue<>(capacity);
@@ -34,87 +47,70 @@ public class DefaultProducerConsumerContext<T> implements
 		producerAccumulator = new AtomicInteger();
 		processorAccumulator = new AtomicInteger();
 		persisterAccumulator = new AtomicInteger();
-	}
-
-	@Override
-	public BlockingQueue<T> getProducerProcessorQueue() {
-		return producerProcessorQueue;
-	}
-
-	@Override
-	public void setProducerProcessorQueue(BlockingQueue<T> queue) {
-		synchronized (this.producerProcessorQueue) {
-			this.producerProcessorQueue = queue;
-		}
-	}
-
-	@Override
-	public BlockingQueue<T> getProcessorPersisterQueue() {
-		return processorPersisterQueue;
-	}
-
-	@Override
-	public void setProcessorPersisterQueue(BlockingQueue<T> queue) {
-		synchronized (this.processorPersisterQueue) {
-			this.processorPersisterQueue = queue;
-		}
+		producerStateLock = new ReentrantReadWriteLock();
+		processorStateLock = new ReentrantReadWriteLock();
+		persisterStateLock = new ReentrantReadWriteLock();
+		workEndMonitor = new ReentrantLock();
 	}
 
 	@Override
 	public ProducerConsumerState getProducerState() {
-		synchronized (this.producerState) {
+		try {
+			producerStateLock.readLock().lock();
 			return producerState;
+		} finally {
+			producerStateLock.readLock().unlock();
 		}
 	}
 
 	@Override
 	public void setProducerState(ProducerConsumerState state) {
-		synchronized (this.producerState) {
+		try {
+			producerStateLock.readLock().lock();
 			this.producerState = state;
+		} finally {
+			producerStateLock.readLock().unlock();
 		}
 	}
 
 	@Override
 	public ProducerConsumerState getProcessorState() {
-		synchronized (this.processorState) {
+		try {
+			processorStateLock.readLock().lock();
 			return processorState;
+		} finally {
+			processorStateLock.readLock().unlock();
 		}
 	}
 
 	@Override
 	public void setProcessorState(ProducerConsumerState state) {
-		synchronized (this.processorState) {
+		try {
+			processorStateLock.readLock().lock();
 			this.processorState = state;
+		} finally {
+			processorStateLock.readLock().unlock();
 		}
 	}
 
 	@Override
 	public ProducerConsumerState getPersisterState() {
-		synchronized (this.persisterState) {
+		try {
+			persisterStateLock.readLock().lock();
 			return persisterState;
+		} finally {
+			persisterStateLock.readLock().unlock();
 		}
 	}
 
 	@Override
 	public void setPersisterState(ProducerConsumerState state) {
-		synchronized (this.persisterState) {
+		try {
+			persisterStateLock.readLock().lock();
 			this.persisterState = state;
+		} finally {
+			persisterStateLock.readLock().unlock();
 		}
-	}
-
-	@Override
-	public AtomicInteger getProducerAccumulator() {
-		return producerAccumulator;
-	}
-
-	@Override
-	public AtomicInteger getProcessorAccumulator() {
-		return processorAccumulator;
-	}
-
-	@Override
-	public AtomicInteger getPersisterAccumulator() {
-		return persisterAccumulator;
 	}
 
 	@Override
@@ -135,5 +131,75 @@ public class DefaultProducerConsumerContext<T> implements
 	@Override
 	public boolean hasWorkEnded() {
 		return hasProducerEnded() && hasProcessorEnded() && hasPersisterEnded();
+	}
+
+	@Override
+	public T retrieveProducerProcessorWorkUnit() throws InterruptedException {
+		return producerProcessorQueue.take();
+	}
+
+	@Override
+	public void addProducerProcessorWorkUnit(T workUnit)
+			throws InterruptedException {
+		producerProcessorQueue.put(workUnit);
+		producerAccumulator.incrementAndGet();
+	}
+
+	@Override
+	public T retrieveProcessorPersisterWorkUnit() throws InterruptedException {
+		return processorPersisterQueue.take();
+	}
+
+	@Override
+	public void addProcessorPersisterWorkUnit(T workUnit)
+			throws InterruptedException {
+		processorPersisterQueue.put(workUnit);
+		processorAccumulator.incrementAndGet();
+	}
+
+	@Override
+	public void registerPersisterWorkUnit() {
+		persisterAccumulator.incrementAndGet();
+	}
+
+	@Override
+	public boolean isProducerProcessorQueueEmpty() {
+		return producerProcessorQueue.size() == BigDecimal.ZERO.intValue();
+	}
+
+	@Override
+	public boolean isProcessorPersisterQueueEmpty() {
+		return processorPersisterQueue.size() == BigDecimal.ZERO.intValue();
+	}
+
+	@Override
+	public boolean hasProducerConsumerEnded() {
+		return hasProducerEnded() && hasProcessorEnded()
+				&& isProcessorPersisterQueueEmpty();
+	}
+
+	@Override
+	public int getProducedLineCounter() {
+		return producerAccumulator.get();
+	}
+
+	@Override
+	public int getProcessedLineCounter() {
+		return processorAccumulator.get();
+	}
+
+	@Override
+	public int getPersisterLineCounter() {
+		return persisterAccumulator.get();
+	}
+
+	@Override
+	public void waitForWorkEnd() throws InterruptedException {
+		workEndMonitor.wait();
+	}
+
+	@Override
+	public void notifyOfWorkEnd() throws InterruptedException {
+		workEndMonitor.notify();
 	}
 }

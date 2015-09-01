@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.markhyvka.copy.domain.Employee;
 import com.markhyvka.copy.util.DeepCopyUtil;
 
 public class EntryPoint {
 
-	final static Logger LOG = Logger.getLogger(EntryPoint.class);
+	private final static Logger LOG = LoggerFactory.getLogger(EntryPoint.class);
 
 	private static final long FAVOURITE_USER_16 = 16L;
 	private static final long FAVOURITE_USER_14 = 14L;

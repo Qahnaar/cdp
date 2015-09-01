@@ -8,13 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.markhyvka.lazy.util.DataSource;
 
 public class RowModelCachingDataSource<T> implements DataSource<T> {
 
-	final static Logger LOG = Logger.getLogger(RowModelCachingDataSource.class);
+	private final static Logger LOG = LoggerFactory
+			.getLogger(RowModelCachingDataSource.class);
 
 	private List<T> loadedLines;
 
@@ -47,7 +49,7 @@ public class RowModelCachingDataSource<T> implements DataSource<T> {
 		cursorCounter = offset;
 		return returnNLinesFromOffset(amount);
 	}
-	
+
 	@Override
 	public int getDataSourceSize() {
 		return loadedLines.size();

@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.markhyvka.proxy.domain.CalcuationStrategy;
 import com.markhyvka.proxy.domain.Cart;
@@ -14,7 +15,7 @@ import com.markhyvka.proxy.util.ProxyUtil;
 
 public class EntryPoint {
 
-	final static Logger LOG = Logger.getLogger(EntryPoint.class);
+	private final static Logger LOG = LoggerFactory.getLogger(EntryPoint.class);
 
 	private static final String USERNAME = "username";
 	private static final String SPRITE = "sprite";
