@@ -37,6 +37,7 @@ public class LinePersisterUnit implements WorkUnit<String> {
 			String obj = consume();
 			LOG.debug("Line Persister: another line processed (" + obj + ").");
 			writer.println(obj);
+			context.registerPersisterWorkUnit();
 		}
 		LOG.debug("Line Persister: ended data persisting.");
 		writer.close();
