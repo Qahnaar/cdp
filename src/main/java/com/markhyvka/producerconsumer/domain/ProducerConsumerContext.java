@@ -32,8 +32,6 @@ public interface ProducerConsumerContext<T> {
 
 	boolean hasPersisterEnded();
 
-	boolean hasWorkEnded();
-
 	boolean isProcessorPersisterQueueEmpty();
 
 	boolean hasProducerConsumerEnded();

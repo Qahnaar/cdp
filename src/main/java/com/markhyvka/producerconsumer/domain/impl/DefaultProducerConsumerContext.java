@@ -66,10 +66,10 @@ public class DefaultProducerConsumerContext<T> implements
 	@Override
 	public void setProducerState(ProducerConsumerState state) {
 		try {
-			producerStateLock.readLock().lock();
+			producerStateLock.writeLock().lock();
 			this.producerState = state;
 		} finally {
-			producerStateLock.readLock().unlock();
+			producerStateLock.writeLock().unlock();
 		}
 	}
 
@@ -86,10 +86,10 @@ public class DefaultProducerConsumerContext<T> implements
 	@Override
 	public void setProcessorState(ProducerConsumerState state) {
 		try {
-			processorStateLock.readLock().lock();
+			processorStateLock.writeLock().lock();
 			this.processorState = state;
 		} finally {
-			processorStateLock.readLock().unlock();
+			processorStateLock.writeLock().unlock();
 		}
 	}
 
@@ -106,10 +106,10 @@ public class DefaultProducerConsumerContext<T> implements
 	@Override
 	public void setPersisterState(ProducerConsumerState state) {
 		try {
-			persisterStateLock.readLock().lock();
+			persisterStateLock.writeLock().lock();
 			this.persisterState = state;
 		} finally {
-			persisterStateLock.readLock().unlock();
+			persisterStateLock.writeLock().unlock();
 		}
 	}
 
@@ -126,11 +126,6 @@ public class DefaultProducerConsumerContext<T> implements
 	@Override
 	public boolean hasPersisterEnded() {
 		return ProducerConsumerState.DONE.equals(getPersisterState());
-	}
-
-	@Override
-	public boolean hasWorkEnded() {
-		return hasProducerEnded() && hasProcessorEnded() && hasPersisterEnded();
 	}
 
 	@Override
@@ -195,11 +190,15 @@ public class DefaultProducerConsumerContext<T> implements
 
 	@Override
 	public void waitForWorkEnd() throws InterruptedException {
-		workEndMonitor.wait();
+		synchronized (workEndMonitor) {
+			workEndMonitor.wait();
+		}
 	}
 
 	@Override
 	public void notifyOfWorkEnd() throws InterruptedException {
-		workEndMonitor.notify();
+		synchronized (workEndMonitor) {
+			workEndMonitor.notify();
+		}
 	}
 }

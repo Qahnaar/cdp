@@ -21,7 +21,7 @@ public class LineProcessorUnit implements WorkUnit<String> {
 	@Override
 	public void run() {
 		LOG.debug("Line Processor: started data processing.");
-		while (!context.hasProducerConsumerEnded()) {
+		while (!(context.hasProducerEnded() && context.isProducerProcessorQueueEmpty())) {
 			String obj = consume();
 			LOG.debug("Line Processor: another entry retrieved (" + obj + ").");
 			String processedObj = process(obj);

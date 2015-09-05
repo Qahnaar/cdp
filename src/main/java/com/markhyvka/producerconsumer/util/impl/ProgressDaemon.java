@@ -16,9 +16,9 @@ public class ProgressDaemon implements Runnable {
 	@Override
 	public void run() {
 		System.out.println("Progress Daemon: started watching the progress.");
-		while (!context.hasWorkEnded()) {
+		while (!context.hasProducerConsumerEnded()) {
 			try {
-				TimeUnit.SECONDS.wait(BigDecimal.ONE.intValue());
+				TimeUnit.SECONDS.sleep(BigDecimal.ONE.intValue());
 				System.out.println("Produced lines: "
 						+ context.getProducedLineCounter());
 				System.out.println("Processed lines: "

@@ -42,6 +42,11 @@ public class LinePersisterUnit implements WorkUnit<String> {
 		LOG.debug("Line Persister: ended data persisting.");
 		writer.close();
 		context.setPersisterState(ProducerConsumerState.DONE);
+		try {
+			context.notifyOfWorkEnd();
+		} catch (InterruptedException e) {
+			LOG.debug("Line Persister: interrupted while notifying of work end.");
+		}
 	}
 
 	private String consume() {
