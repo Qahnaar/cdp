@@ -142,7 +142,9 @@ public class DefaultProducerConsumerContext<T> implements
 
 	@Override
 	public T retrieveProcessorPersisterWorkUnit() throws InterruptedException {
-		return processorPersisterQueue.take();
+		synchronized (processorPersisterQueue) {
+			return processorPersisterQueue.take();
+		}
 	}
 
 	@Override
